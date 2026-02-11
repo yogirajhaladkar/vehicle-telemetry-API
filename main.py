@@ -1,220 +1,74 @@
-from fastapi import FastAPI  , status , Body
-from models import vehicle_info
-from typing import Dict , Any 
-from database import connect
-import json
+from fastapi import FastAPI  , status , Depends
+from pydantic import BaseModel
+import models
+from typing import List,Annotated
+from database import engine ,sessionLocal
+from sqlalchemy.orm import Session
 
 app = FastAPI()
 
-@app.post("/post_vehivcle_update")
-def vehicle_infor(df : vehicle_info):
-    conn = connect()
-    cursor = conn.cursor()
-
-    query = """ 
-    INSERT INTO vehicle_telemetry (
-
-    vehicle_id, imei, registration_number,
-        gps_latitude, gps_longitude, gps_altitude,
-        gps_course_in_degrees, gps_signal_quality, gps_fix,
-        ignition_on, crank_on, speed, odometer,
-        vehicle_status, ac_status,
-        no_of_fuel_tanks,
-        primary_fuel_level, primary_fuel_tank_capacity,
-        secondary_fuel_level1, secondary_fuel_tank_capacity1,
-        def_level, fuel_level_percent,
-        backup_battery_voltage, vehicle_battery_voltage,
-        no_of_battery_packs,
-        battery_soc,
-        accel_x, accel_y, accel_z,
-        gyro_x, gyro_y, gyro_z,
-        engine_run_hour, current_gear,
-        event_date_time
-    
-    )
-    VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s)
-    """
-    values = (
-        df.vehicleId,
-        df.imei,
-        df.registrationNumber,
-
-        df.gpsLatitude,
-        df.gpsLongitude,
-        df.gpsAltitude,
-        df.gpsCourseInDegrees,
-        df.gpsSignalQuality,
-        df.gpsFix,
-
-        df.ignitionOn,
-        df.crankOn,
-        df.speed,
-        df.odometer,
-
-        df.vehicleStatus,
-        df.acStatus,
-
-        df.noOfFuelTanks,
-        df.PrimaryFuelLevel,
-        df.primaryFuelTankCapacity,
-        df.SecondaryFuelLevel1,
-        df.secondaryFuelTankCapacity1,
-        df.defLevel,
-        df.fuelLevelPercent,
-
-        df.backupBatteryVoltage,
-        df.vehicleBatteryVoltage,
-
-        df.noOfBatteryPacks,
-
-        json.dumps(df.batterySOC), 
-
-        df.accelX,
-        df.accelY,
-        df.accelZ,
-        df.gyroX,
-        df.gyroY,
-        df.gyroZ,
-
-        df.engineRunHour,
-        df.currentGear,
-
-        df.eventDateTime
-        
-    )
-
-    cursor.execute(query , values)
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-
-    return ("vehicle data saved")
+models.Base.metadata.create_all(bind=engine)
 
 
+class vehicle_info(BaseModel):
 
-@app.get("/get-data" , status_code= status.HTTP_200_OK)
+    vehicleId: str
+    gps_Latitude: float
+    gps_Longitude: float
+    gps_Altitude: int
+    gps_CourseInDegrees: int
+    gps_SignalQuality: int
+    gps_Fix: bool
+    ignitionOn: bool
+    crankOn: bool
+    speed: int
+    odometer: int
+    no_Of_Fuel_Tanks: int
 
-async def get_data():
-    conn = connect()
-    cursor = conn.cursor()
+    PrimaryFuelLevel: int
+    primaryFuelTankCapacity: int
+    SecondaryFuelLevel1: int
+    secondaryFuelTankCapacity1: int
+    defLevel: int
 
-    query = "SELECT * FROM vehicle_telemetry.vehicle_telemetry;"
-    cursor.execute(query)
+    backupBatteryVoltage: float
+    vehicleBatteryVoltage: float
 
-    result = cursor.fetchall()
+    accelX: float
+    accelY: float
+    accelZ: float
+    gyroX: float
+    gyroY: float
+    gyroZ: float
 
-    cursor.close()
-    conn.close()
+    acStatus: bool
+    vehicleStatus: str
+    engineRunHour: float
+    currentGear: float
+    fuelLevelPercent: float
 
-    return result
+    batterySOC: List[float]
+    noOfBatteryPacks: int
 
+    imei: str
+    registrationNumber: str
+    eventDateTime: str
 
-
-@app.get("/get-data-by-id{veh_id}"  , status_code= status.HTTP_200_OK)
-
-async def getbyvehid(veh_id : str):
-    conn = connect()
-    cursor = conn.cursor()
-
-    query = """
-        SELECT * FROM vehicle_telemetry.vehicle_telemetry
-        where vehicle_id = %s ;
-    """
-    cursor.execute(query , (veh_id,))
-
-    result = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return result
-
-@app.put("/update-vehicle/{veh_id}")
-def update_vehicle(veh_id: str, data: Dict[str , Any]= Body(...)):
-
-    conn = None
-    cursor = None
-
+def getdb():
+    db = sessionLocal()
     try:
-        conn = connect()
-        cursor = conn.cursor()
-
-        allowed_fields = [
-            "speed",
-            "fuelLevelPercent",
-            "vehicleStatus",
-            "engineRunHour",
-            "currentGear"
-        ]
-        update_parts: list[str] = []
-        values: list[Any] = []
-
-
-        for key, value in data.items():
-            if key in allowed_fields:
-
-                column_name = key   
-
-                if key == "fuelLevelPercent":
-                    column_name = "fuel_level_percent"
-                elif key == "vehicleStatus":
-                    column_name = "vehicle_status"
-                elif key == "engineRunHour":
-                    column_name = "engine_run_hour"
-                elif key == "currentGear":
-                    column_name = "current_gear"
-                else:
-                    column_name = key
-
-                update_parts.append(f"{column_name} = %s")
-                values.append(value)
-
-
-        if not update_parts:
-            return {"message": "No valid fields provided"}
-
-        query = f"""
-        UPDATE vehicle_telemetry
-        SET {", ".join(update_parts)}
-        WHERE vehicle_id = %s
-        """
-
-        values.append(veh_id)
-
-        cursor.execute(query, tuple(values))
-        conn.commit()
-
-        if cursor.rowcount == 0:
-            return {"message": "Vehicle not found"}
-
-        return {"message": "Vehicle updated successfully"}
-
-    except Exception as e:
-        return {"error": str(e)}
-
+        yield db
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        db.close()
+
+db_dependency = Annotated[Session , Depends(getdb)]
 
 
+@app.post("/gps/new-location",status_code=status.HTTP_201_CREATED)
+async def vehicle_infor(post_info : vehicle_info , db : db_dependency):
+    db_info = models.VehicleInfo(**post_info.model_dump())
+    db.add(db_info)
+    db.commit()
+    return {"Data inserted to vehicle vehicle telemetry succsesfully!!"}
 
-@app.delete("/del_data/{veh_id}"  , status_code= status.HTTP_200_OK)
-
-async def delet_veh_data(veh_id : str):
-    conn = connect()
-    cursor = conn.cursor()
-
-    query = """
-        delete FROM vehicle_telemetry.vehicle_telemetry
-        where vehicle_id = %s ;
-    """
-
-    cursor.execute(query , (veh_id,))
-    conn.commit()
-
-    cursor.close()
-    conn.close()
 

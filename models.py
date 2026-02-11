@@ -1,46 +1,55 @@
-from pydantic import BaseModel
-from typing import List
+from sqlalchemy import Column, Integer, String, Float, Boolean, JSON
+from database import Base
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class vehicle_info(BaseModel):
-    vehicleId: str
-    gpsLatitude: float
-    gpsLongitude: float
-    gpsAltitude: int
-    gpsCourseInDegrees: int
-    gpsSignalQuality: int
-    gpsFix: bool
-    ignitionOn: bool
-    crankOn: bool
-    speed: int
-    odometer: int
-    noOfFuelTanks: int
 
-    PrimaryFuelLevel: int
-    primaryFuelTankCapacity: int
-    SecondaryFuelLevel1: int
-    secondaryFuelTankCapacity1: int
-    defLevel: int
 
-    backupBatteryVoltage: float
-    vehicleBatteryVoltage: float
+class VehicleInfo(Base):
+    __tablename__ = "vehicle_telemetry"
 
-    accelX: float
-    accelY: float
-    accelZ: float
-    gyroX: float
-    gyroY: float
-    gyroZ: float
+    id = Column(Integer, primary_key=True, index=True)
 
-    acStatus: bool
-    vehicleStatus: str
-    engineRunHour: float
-    currentGear: float
-    fuelLevelPercent: float
+    vehicleId = Column(String(64))
+    gps_Latitude : Mapped[float] = mapped_column(Float)
+    gps_Longitude : Mapped[float] = mapped_column(Float)
+    gps_Altitude = Column(Integer)
+    gps_CourseInDegrees = Column(Integer)
+    gps_SignalQuality = Column(Integer)
+    gps_Fix = Column(Boolean)
 
-    batterySOC: List[float]
-    noOfBatteryPacks: int
+    ignitionOn = Column(Boolean)
+    crankOn = Column(Boolean)
+    speed = Column(Integer)
+    odometer = Column(Integer)
+    no_Of_Fuel_Tanks = Column(Integer)
 
-    imei: str
-    registrationNumber: str
-    eventDateTime: str
+    PrimaryFuelLevel = Column(Integer)
+    primaryFuelTankCapacity = Column(Integer)
+    SecondaryFuelLevel1 = Column(Integer)
+    secondaryFuelTankCapacity1 = Column(Integer)
+    defLevel = Column(Integer)
+
+    backupBatteryVoltage : Mapped[float] = mapped_column(Float)
+    vehicleBatteryVoltage : Mapped[float] = mapped_column(Float)
+
+    accelX : Mapped[float] = mapped_column(Float)
+    accelY : Mapped[float] = mapped_column(Float)
+    accelZ : Mapped[float] = mapped_column(Float)
+    gyroX : Mapped[float] = mapped_column(Float)
+    gyroY : Mapped[float] = mapped_column(Float)
+    gyroZ : Mapped[float] = mapped_column(Float)
+
+    acStatus = Column(Boolean)
+    vehicleStatus = Column(String(64))
+    engineRunHour : Mapped[float] = mapped_column(Float)
+    currentGear : Mapped[float] = mapped_column(Float)
+    fuelLevelPercent : Mapped[float] = mapped_column(Float)
+
+    batterySOC = Column(JSON)
+    noOfBatteryPacks = Column(Integer)
+
+    imei = Column(String(32))
+    registrationNumber = Column(String(32))
+    eventDateTime = Column(String(64))
+
