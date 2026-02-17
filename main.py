@@ -1,10 +1,10 @@
-from fastapi import FastAPI  , status , Depends
-from pydantic import BaseModel
+from fastapi import FastAPI  , status , Depends , HTTPException
+from pydantic import BaseModel , Field
 import models
 from typing import List,Annotated
 from database import engine ,sessionLocal
 from sqlalchemy.orm import Session
-
+from sqlalchemy.exc import IntegrityError
 app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
@@ -21,7 +21,7 @@ class vehicle_info(BaseModel):
     gps_Fix: bool
     ignitionOn: bool
     crankOn: bool
-    speed: int
+    speed: int= Field(..., ge=0)
     odometer: int
     no_Of_Fuel_Tanks: int
 
@@ -67,8 +67,14 @@ db_dependency = Annotated[Session , Depends(getdb)]
 @app.post("/gps/new-location",status_code=status.HTTP_201_CREATED)
 async def vehicle_infor(post_info : vehicle_info , db : db_dependency):
     db_info = models.VehicleInfo(**post_info.model_dump())
-    db.add(db_info)
-    db.commit()
-    return {"Data inserted to vehicle vehicle telemetry succsesfully!!"}
+    try:
+        db.add(db_info)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409 , "vehicle already exist")
+
+    return {"message": "Data inserted to vehicle telemetry successfully!!"}
+
 
 

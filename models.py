@@ -10,7 +10,7 @@ class VehicleInfo(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    vehicleId = Column(String(64))
+    vehicleId = Column(String(64) , unique=True)
     gps_Latitude : Mapped[float] = mapped_column(Float)
     gps_Longitude : Mapped[float] = mapped_column(Float)
     gps_Altitude = Column(Integer)
@@ -43,7 +43,7 @@ class VehicleInfo(Base):
     acStatus = Column(Boolean)
     vehicleStatus = Column(String(64))
     engineRunHour : Mapped[float] = mapped_column(Float)
-    currentGear : Mapped[float] = mapped_column(Float)
+    currentGear = Column(Integer)
     fuelLevelPercent : Mapped[float] = mapped_column(Float)
 
     batterySOC = Column(JSON)
