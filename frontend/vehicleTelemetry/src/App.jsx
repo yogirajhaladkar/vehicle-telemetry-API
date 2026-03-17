@@ -1,15 +1,19 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
+import Layout from './Layout/Layout'
 import './App.css'
 
+const rtr = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<Layout />}>
+    </Route>
+  )
+)
+
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-
+      <RouterProvider router={rtr} />
     </>
   )
 }

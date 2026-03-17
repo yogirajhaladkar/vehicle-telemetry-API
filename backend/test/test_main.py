@@ -16,7 +16,7 @@ def test_newlocation(Data :Any):
         rsp = client.post("/gps/new-location" , json= Data["data"])
         
         assert rsp.status_code==Data["expected_status"]
-        time.sleep(1)  
+        time.sleep(2)  
 
 
 
