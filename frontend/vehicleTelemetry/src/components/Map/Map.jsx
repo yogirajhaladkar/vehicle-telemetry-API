@@ -87,7 +87,7 @@ export default function Map() {
     }, [apiKey, hasValidCoordinates, latitude, longitude, dynamicData?.vehicleId]);
 
     if (!dynamicData) {
-        return <div className="h-full w-full grid place-items-center">No telemetry selected</div>;
+        return <div className="h-full w-full grid place-items-center">No vehicle selected</div>;
     }
 
     if (!apiKey) {

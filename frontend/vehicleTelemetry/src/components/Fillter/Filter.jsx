@@ -48,7 +48,7 @@ export default function Filter() {
   };
 
   return (
-    <div>
+    <div className="flex flex-row justify-around p-4">
       <select
         className="border-2 border-gray-300 px-4 py-2 m-2 rounded"
         value={vehicle}
