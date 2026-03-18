@@ -12,8 +12,8 @@ export default function DynamicData() {
             <h2 className="font-bold mb-2">Dynamic Data</h2>
 
 
-            <p><strong>Latitude:</strong> {dynamicData.latitude}</p>
-            <p><strong>Longitude:</strong> {dynamicData.longitude}</p>
+            {/* <p><strong>Latitude:</strong> {dynamicData.latitude}</p>
+            <p><strong>Longitude:</strong> {dynamicData.longitude}</p> */}
             <p><strong>Altitude:</strong> {dynamicData.altitude}</p>
 
 
