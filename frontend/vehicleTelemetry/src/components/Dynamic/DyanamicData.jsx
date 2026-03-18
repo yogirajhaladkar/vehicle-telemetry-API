@@ -4,11 +4,11 @@ export default function DynamicData() {
     const dynamicData = useSelector((state) => state.vehicle.dynamicData);
 
     if (!dynamicData) {
-        return <div className="p-4">No Data Found</div>;
+        return <div className="p-8">No Data Found</div>;
     }
 
     return (
-        <div className="p-4">
+        <div className=" p-8">
             <h2 className="font-bold mb-2">Dynamic Data</h2>
 
 

@@ -4,11 +4,16 @@ export const fetchVehicleData = createAsyncThunk(
   "vehicle/fetchVehicleData",
   async ({ vehicle, date, time }, thunkAPI) => {
     try {
-      const formattedTime = time.length === 5 ? `${time}:00` : time;
+      const normalizedTime = (time || "").includes(" ")
+        ? time.split(" ")[1]
+        : time;
+      const formattedTime = normalizedTime.length === 5 ? `${normalizedTime}:00` : normalizedTime;
+      const query = new URLSearchParams({ date, time: formattedTime });
 
       const response = await fetch(
-        `http://127.0.0.1:8000/gps/vehicle/${vehicle}/telemetry?date=${date}&time=${formattedTime}`
+        `http://127.0.0.1:8000/gps/vehicle/${vehicle}/telemetry?${query.toString()}`
       );
+      console.log(response)
 
       if (!response.ok) {
         throw new Error("Failed to fetch vehicle data");

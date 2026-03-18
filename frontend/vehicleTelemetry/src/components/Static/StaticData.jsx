@@ -3,10 +3,10 @@ import { useSelector } from "react-redux";
 export default function StaticData() {
     const staticData = useSelector((state) => state.vehicle.staticData);
     if (!staticData) {
-        return <div className="p-4">No Data Found</div>;
+        return <div className="p-8">No Data Found</div>;
     }
     return (
-        <div className="p-4">
+        <div className="p-8">
             {staticData && (
                 <div>
                     <p><strong>Vehicle ID:</strong> {staticData.vehicleId}</p>

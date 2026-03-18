@@ -259,3 +259,19 @@ async def get_vehicle_telemetry(vehicle_id: str, date: Date, time: Time, db: db_
 def get_all_vehicles(db: db_dependency):
     vehicles = db.query(models.vehicle_info.vehicleId).distinct().all()
     return [v.vehicleId for v in vehicles]
+
+
+
+@app.get("/times/vehicle/{vehicle_id}/{date}")
+def get_available_times(vehicle_id: str, date: Date, db: db_dependency):
+    times = (
+        db.query(models.Vehicle_telemetry.eventDateTime)
+        .filter(
+            models.Vehicle_telemetry.vehicleId == vehicle_id,
+            models.Vehicle_telemetry.eventDateTime >= datetime.combine(date, Time.min),
+            models.Vehicle_telemetry.eventDateTime <= datetime.combine(date, Time.max),
+        )
+        .distinct()
+        .all()
+    )
+    return [t.eventDateTime.strftime("%H:%M:%S") for t in times]

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setFilter, fetchVehicleData } from "../../store/vehicleSlice";
 
@@ -24,12 +24,20 @@ export default function Filter() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [vehicles, setVehicles] = useState([]);
-
+  const [timeOptions, setTimeOptions] = useState([]);
   useEffect(() => {
     fetch("http://127.0.0.1:8000/vehicles")
       .then(res => res.json())
       .then(data => setVehicles(data));
   }, []);
+
+  useEffect(() => {
+    if (vehicle && date) {
+      fetch(`http://127.0.0.1:8000/times/vehicle/${vehicle}/${date}`)
+        .then(res => res.json())
+        .then(data => setTimeOptions(data));
+    }
+  }, [vehicle, date]);
 
 
   const handleFilter = () => {
