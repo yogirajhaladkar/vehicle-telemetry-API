@@ -86,18 +86,29 @@ class DynamicDataResponse(BaseModel):
     latitude: float
     longitude: float
     altitude: int
-    speed: int
-    satellites: int
-    ignition: bool
+    gps_CourseInDegrees: int
+    gps_SignalQuality: int
     gpsFix: bool
-    gsmSignal: int
+    ignition: bool
+    crank: bool
+    speed: int
     odometer: int
-    fuelLevel: int
+    primaryFuelLevel: int
+    secondaryFuelLevel1: int
+    defLevel: int
+    backupBatteryVoltage: float
     batteryVoltage: float
+
     accelX: float
     accelY: float
     accelZ: float
+    gyroX: float
+    gyroY: float
+    gyroZ: float
+
     status: str
+    vehicleStatus: str
+    engineRunHour: float
     gear: int
     fuelLevelPercent: float
     batterySOC: List[float]
@@ -236,22 +247,35 @@ async def get_vehicle_telemetry(vehicle_id: str, date: Date, time: Time, db: db_
             latitude=telemetry.gps_Latitude,
             longitude=telemetry.gps_Longitude,
             altitude=telemetry.gps_Altitude,
-            speed=telemetry.speed,
-            satellites=telemetry.gps_SignalQuality,
-            ignition=telemetry.ignitionOn,
+            gps_CourseInDegrees=telemetry.gps_CourseInDegrees,
+            gps_SignalQuality=telemetry.gps_SignalQuality,
             gpsFix=telemetry.gps_Fix,
-            gsmSignal=telemetry.gps_SignalQuality,
+            ignition=telemetry.ignitionOn,
+            crank=telemetry.crankOn,
+            speed=telemetry.speed,
             odometer=telemetry.odometer,
-            fuelLevel=telemetry.PrimaryFuelLevel,
+            primaryFuelLevel=telemetry.PrimaryFuelLevel,
+            secondaryFuelLevel1=telemetry.SecondaryFuelLevel1,
+            defLevel=telemetry.defLevel,
+            backupBatteryVoltage=telemetry.backupBatteryVoltage,
             batteryVoltage=telemetry.vehicleBatteryVoltage,
+
             accelX=telemetry.accelX,
             accelY=telemetry.accelY,
             accelZ=telemetry.accelZ,
-            status=telemetry.vehicleStatus,
-            gear=telemetry.currentGear,
-            fuelLevelPercent=telemetry.fuelLevelPercent,
-            batterySOC=telemetry.batterySOC,
-            timestamp=str(time)
+
+            gyroX = telemetry.gyroX,
+            gyroY = telemetry.gyroY,
+            gyroZ = telemetry.gyroZ,
+
+            status = "on" if telemetry.acStatus else "off",
+            vehicleStatus = telemetry.vehicleStatus,
+            engineRunHour = telemetry.engineRunHour,
+            gear = telemetry.currentGear,
+            fuelLevelPercent = telemetry.fuelLevelPercent,
+            batterySOC = telemetry.batterySOC,
+            timestamp = telemetry.eventDateTime.strftime("%Y-%m-%d %H:%M:%S")  #type: ignore
+            
         )
     )
 
