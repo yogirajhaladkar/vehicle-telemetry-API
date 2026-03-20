@@ -2,6 +2,7 @@ from sqlalchemy import Integer, String, Float, Boolean, JSON, DateTime
 from database import Base
 from sqlalchemy.orm import Mapped, mapped_column
 
+
 class vehicle_info(Base):
     __tablename__ = "vehicle_info"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -12,8 +13,6 @@ class vehicle_info(Base):
     primaryFuelTankCapacity: Mapped[int] = mapped_column(Integer)
     secondaryFuelTankCapacity1: Mapped[int] = mapped_column(Integer)
     noOfBatteryPacks: Mapped[int] = mapped_column(Integer)
-
-    
 
 
 class Vehicle_telemetry(Base):

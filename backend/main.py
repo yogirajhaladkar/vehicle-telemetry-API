@@ -12,7 +12,6 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # allow all (for development)
@@ -20,6 +19,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 models.Base.metadata.create_all(bind=engine)
 
 
@@ -239,7 +239,7 @@ async def get_vehicle_telemetry(vehicle_id: str, date: Date, time: Time, db: db_
             noOfFuelTanks=vehicle.no_Of_Fuel_Tanks,
             primaryFuelTankCapacity=vehicle.primaryFuelTankCapacity,
             secondaryFuelTankCapacity=vehicle.secondaryFuelTankCapacity1,
-            noOfBatteryPacks=vehicle.noOfBatteryPacks
+            noOfBatteryPacks=vehicle.noOfBatteryPacks 
         ),
         dynamicData=DynamicDataResponse(
             id=telemetry.id,
@@ -279,11 +279,11 @@ async def get_vehicle_telemetry(vehicle_id: str, date: Date, time: Time, db: db_
         )
     )
 
+
 @app.get("/vehicles")
 def get_all_vehicles(db: db_dependency):
     vehicles = db.query(models.vehicle_info.vehicleId).distinct().all()
     return [v.vehicleId for v in vehicles]
-
 
 
 @app.get("/times/vehicle/{vehicle_id}/{date}")

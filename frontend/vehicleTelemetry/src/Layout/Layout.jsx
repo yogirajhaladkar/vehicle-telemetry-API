@@ -1,4 +1,3 @@
-import React from 'react'
 import Header from '../components/Header/Header'
 import Filter from '../components/Fillter/Filter'
 import StaticData from '../components/Static/StaticData'
@@ -17,7 +16,6 @@ function Layout() {
             <div className='border row-start-2 col-span-2'>
                 <Filter />
             </div>
-
             <div className='border row-start-3 col-span-1 overflow-y-auto min-h-0'>
                 <StaticData />
             </div>

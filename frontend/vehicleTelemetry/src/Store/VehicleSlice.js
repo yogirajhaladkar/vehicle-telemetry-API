@@ -27,6 +27,7 @@ export const fetchVehicleData = createAsyncThunk(
   }
 );
 
+
 const initialState = {
   filter: {
     vehicle: "",
@@ -38,6 +39,7 @@ const initialState = {
   loading: false,
   error: null,
 };
+
 
 const vehicleSlice = createSlice({
   name: "vehicle",
@@ -65,5 +67,7 @@ const vehicleSlice = createSlice({
   },
 });
 
+
 export const { setFilter } = vehicleSlice.actions;
+
 export default vehicleSlice.reducer;
