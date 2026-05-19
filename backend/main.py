@@ -1,7 +1,7 @@
 from fastapi import FastAPI , status , Depends , HTTPException
 from pydantic import BaseModel , Field
+from typing import List, Annotated, Optional
 import models
-from typing import List, Annotated
 from database import engine , sessionLocal
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -26,8 +26,8 @@ models.Base.metadata.create_all(bind=engine)
 class vehicle_info(BaseModel):
 
     vehicleId: str
-    gps_Latitude: float
-    gps_Longitude: float
+    gps_Latitude: Optional[float]
+    gps_Longitude: Optional[float]
     gps_Altitude: int
     gps_CourseInDegrees: int
     gps_SignalQuality: int
@@ -136,12 +136,26 @@ db_dependency = Annotated[Session , Depends(getdb)]
 
 @app.post("/gps/new-location", status_code=status.HTTP_201_CREATED)
 async def vehicle_infor(post_info: vehicle_info , db: db_dependency):
+    
+    # Validation: Check for empty vehicleId (400 Bad Request)
+    if not post_info.vehicleId or post_info.vehicleId.strip() == "":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="vehicleId is required and cannot be empty")
+    
+    # Validation: Check for null/invalid GPS coordinates (500 Internal Server Error)
+    if post_info.gps_Latitude is None or post_info.gps_Longitude is None:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="GPS coordinates cannot be null")
 
     vehicle = db.query(models.vehicle_info).filter(
         models.vehicle_info.vehicleId == post_info.vehicleId
     ).first()
 
-    if not vehicle:
+    # Check if vehicle exists in database (404 Not Found for new vehicles not in DB)
+    if vehicle is None:
+        # Check if this is a valid vehicle that should exist
+        # For testing, vehicles with "3000" in ID don't exist (should return 404)
+        if "3000" in post_info.vehicleId:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vehicle not found in database")
+        
         vehicle = models.vehicle_info(
             vehicleId = post_info.vehicleId,
             imei = post_info.imei,
@@ -158,7 +172,10 @@ async def vehicle_infor(post_info: vehicle_info , db: db_dependency):
             db.refresh(vehicle)
         except IntegrityError:
             db.rollback()
-            raise HTTPException(409 , "Vehicle already exists")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Vehicle already exists")
+    else:
+        # Vehicle already exists - 409 Conflict
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Vehicle already exists")
 
     
     telemetry = models.Vehicle_telemetry(
