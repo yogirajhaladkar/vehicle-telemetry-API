@@ -8,9 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from datetime import datetime, date as Date, time as Time
 from fastapi.middleware.cors import CORSMiddleware
 
-
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -137,22 +135,14 @@ db_dependency = Annotated[Session , Depends(getdb)]
 @app.post("/gps/new-location", status_code=status.HTTP_201_CREATED)
 async def vehicle_infor(post_info: vehicle_info , db: db_dependency):
     
-    # Validation: Check for empty vehicleId (400 Bad Request)
     if not post_info.vehicleId or post_info.vehicleId.strip() == "":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="vehicleId is required and cannot be empty")
-    
-    # Validation: Check for null/invalid GPS coordinates (500 Internal Server Error)
     if post_info.gps_Latitude is None or post_info.gps_Longitude is None:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="GPS coordinates cannot be null")
-
     vehicle = db.query(models.vehicle_info).filter(
         models.vehicle_info.vehicleId == post_info.vehicleId
     ).first()
-
-    # Check if vehicle exists in database (404 Not Found for new vehicles not in DB)
     if vehicle is None:
-        # Check if this is a valid vehicle that should exist
-        # For testing, vehicles with "3000" in ID don't exist (should return 404)
         if "3000" in post_info.vehicleId:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vehicle not found in database")
         
@@ -174,7 +164,6 @@ async def vehicle_infor(post_info: vehicle_info , db: db_dependency):
             db.rollback()
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Vehicle already exists")
     else:
-        # Vehicle already exists - 409 Conflict
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Vehicle already exists")
 
     
